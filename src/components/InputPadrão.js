@@ -8,6 +8,7 @@ class InputPadrao extends React.Component {
       <label htmlFor={ name }>
         {description}
         <input
+          data-testid={ name }
           name={ name }
           id={ name }
           value={ value }
