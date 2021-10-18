@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import InputPadrao from '../components/InputPadrão';
 
 class Login extends React.Component {
   constructor() {
@@ -8,68 +7,55 @@ class Login extends React.Component {
     this.state = {
       email: '',
       password: '',
-      disabledBtn: true,
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.checkEmail = this.checkEmail.bind(this);
-    this.checkPassword = this.checkPassword.bind(this);
   }
 
-  handleChange(event) {
-    const { name, value } = event.target;
+  handleChange({ target }) {
+    const { name, value } = target;
     this.setState({
       [name]: value,
-    }, () => this.checkEmail());
+    });
   }
 
-  checkPassword() {
-    const { password } = this.state;
-    const minLength = 6;
-    if (this.validaEmail() && password.length >= minLength) {
-      this.setState({ disabledBtn: false });
-    } else {
-      this.setState({ disabledBtn: true });
-    }
-  }
-
-  checkEmail() {
-    const { email } = this.state;
-    const split = email.split('');
-    if (email.includes('@')
-      && split[split.length - 1] !== '@'
-      && split[split.length - 1] !== '.'
-    ) {
-      return true;
-    }
-    return false;
+  /** https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+   * anyString@anyString.anyString */
+  checkEmail(email) {
+    const emailRegex = /\S+@\S+\.\S+/;
+    return emailRegex.test(email);
   }
 
   render() {
-    const { email, password, disabledBtn } = this.state;
+    const { email, password } = this.state;
+    const minLength = 6;
     return (
       <fieldset>
-        <InputPadrao
-          data-testid="email-input"
-          type="text"
-          name="email-input"
-          description="Email:"
-          handleChange={ this.handleChange }
-          value={ email }
-        />
-        <InputPadrao
-          data-testid="password-input"
-          type="password"
-          name="password-input"
-          description="Senha:"
-          handleChange={ this.handleChange }
-          value={ password }
-        />
+        <label htmlFor="email">
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={ email }
+            onChange={ this.handleChange }
+            data-testid="email-input"
+          />
+        </label>
+        <label htmlFor="password">
+          Senha:
+          <input
+            type="password"
+            name="password"
+            value={ password }
+            onChange={ this.handleChange }
+            data-testid="password-input"
+          />
+        </label>
         <Link to="/carteira">
           <button
             type="submit"
-            disabled={ disabledBtn }
-            onChange={ this.checkPassword }
+            disabled={ !(this.checkEmail(email) && password.length >= minLength) }
           >
             Entrar
           </button>
@@ -78,5 +64,8 @@ class Login extends React.Component {
     );
   }
 }
+
+/** Ref: disabled no button, consultei o repositório do
+ * https://github.com/tryber/sd-014-b-project-trybewallet/pull/58/commits/c20af0f7bcd44701409e390d0ce2e55feedddc2a */
 
 export default Login;
