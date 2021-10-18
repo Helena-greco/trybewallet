@@ -1,5 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { emailUser } from '../actions';
 
 class Login extends React.Component {
   constructor() {
@@ -9,15 +11,16 @@ class Login extends React.Component {
       password: '',
     };
 
+    this.onSubmit = this.onSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.checkEmail = this.checkEmail.bind(this);
   }
 
-  handleChange({ target }) {
-    const { name, value } = target;
-    this.setState({
-      [name]: value,
-    });
+  onSubmit() {
+    const { history, myFirstDispatch } = this.props;
+    const { email } = this.state;
+    myFirstDispatch(email);
+    history.push('/carteira');
   }
 
   /** https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
@@ -25,6 +28,13 @@ class Login extends React.Component {
   checkEmail(email) {
     const emailRegex = /\S+@\S+\.\S+/;
     return emailRegex.test(email);
+  }
+
+  handleChange({ target }) {
+    const { name, value } = target;
+    this.setState({
+      [name]: value,
+    });
   }
 
   render() {
@@ -52,14 +62,13 @@ class Login extends React.Component {
             data-testid="password-input"
           />
         </label>
-        <Link to="/carteira">
-          <button
-            type="submit"
-            disabled={ !(this.checkEmail(email) && password.length >= minLength) }
-          >
-            Entrar
-          </button>
-        </Link>
+        <button
+          type="submit"
+          disabled={ !(this.checkEmail(email) && password.length >= minLength) }
+          onClick={ this.onSubmit }
+        >
+          Entrar
+        </button>
       </fieldset>
     );
   }
@@ -68,4 +77,16 @@ class Login extends React.Component {
 /** Ref: disabled no button, consultei o repositório do
  * https://github.com/tryber/sd-014-b-project-trybewallet/pull/58/commits/c20af0f7bcd44701409e390d0ce2e55feedddc2a */
 
-export default Login;
+Login.propTypes = {
+  myFirstDispatch: PropTypes.func.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  myFirstDispatch: (email) => dispatch(emailUser(email)) });
+
+// req 3 não está passando ainda.
+
+export default connect(null, mapDispatchToProps)(Login);
