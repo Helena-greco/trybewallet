@@ -16,10 +16,11 @@ class ExpenseForm extends React.Component {
     this.getAPIresult();
   }
 
+  // remover as moedas de turismo
   async getAPIresult() {
     const result = await expenseAPI();
     this.setState({
-      APIresult: result.filter((item) => item !== 'USDT'),
+      APIresult: result.filter((currency) => currency !== 'USDT'),
     });
   }
 
