@@ -1,13 +1,11 @@
 import React from 'react';
-import expenseAPI from '../service/ExpenseAPI';
+// import expenseAPI from '../service/ExpenseAPI';
 
 class ExpenseForm extends React.Component {
   constructor() {
     super();
 
     this.state = {
-      API: [],
-      currency: [],
     };
   }
 
