@@ -1,15 +1,30 @@
 import React from 'react';
-// import expenseAPI from '../service/ExpenseAPI';
+import expenseAPI from '../service/ExpenseAPI';
 
 class ExpenseForm extends React.Component {
   constructor() {
     super();
 
     this.state = {
+      APIresult: [],
     };
+
+    this.getAPIresult = this.getAPIresult.bind(this);
+  }
+
+  componentDidMount() {
+    this.getAPIresult();
+  }
+
+  async getAPIresult() {
+    const result = await expenseAPI();
+    this.setState({
+      APIresult: result.filter((item) => item !== 'USDT'),
+    });
   }
 
   render() {
+    const { APIresult } = this.state;
     return (
       <form>
         <label htmlFor="value">
@@ -22,7 +37,11 @@ class ExpenseForm extends React.Component {
         </label>
         <label htmlFor="currency">
           Moeda:
-          <select id="currency">Moeda</select>
+          <select id="currency">
+            { APIresult.map((coin, index) => (
+              <option key={ index }>{ coin }</option>
+            )) }
+          </select>
         </label>
         <label htmlFor="payment">
           Método de pagamento:
