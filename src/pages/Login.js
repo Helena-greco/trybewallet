@@ -41,7 +41,7 @@ class Login extends React.Component {
     const { email, password } = this.state;
     const minLength = 6;
     return (
-      <fieldset>
+      <form>
         <label htmlFor="email">
           Email:
           <input
@@ -69,7 +69,7 @@ class Login extends React.Component {
         >
           Entrar
         </button>
-      </fieldset>
+      </form>
     );
   }
 }
