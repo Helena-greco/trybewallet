@@ -1,33 +1,37 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { actionBtn, expenseAPI } from '../actions/index';
+import { fetchRates, walletObj } from '../actions/index';
+import fetchAPI from '../services/FetchAPI';
 
+// Ajuda do Sérgio Rodrigues nas funções e mandar o estado pro global
 class ExpenseForm extends React.Component {
   constructor() {
     super();
 
     this.state = {
-      value: 0,
+      id: 0,
+      value: '0',
       description: '',
       currency: 'USD',
       method: 'Dinheiro',
       tag: 'Alimentação',
-      exchangeRates: [],
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.getAPI = this.getAPI.bind(this);
+    this.handleCurrencies = this.handleCurrencies.bind(this);
   }
 
   componentDidMount() {
-    this.getAPI();
+    this.handleCurrencies();
   }
 
-  getAPI() {
+  async handleCurrencies() {
     const { getCurrencies } = this.props;
-    getCurrencies();
+    const allCurrencies = await fetchAPI();
+    const currencies = allCurrencies.filter((currency) => currency !== 'USDT');
+    getCurrencies(currencies);
   }
 
   handleChange({ target }) {
@@ -36,20 +40,11 @@ class ExpenseForm extends React.Component {
     });
   }
 
-  async handleClick() {
-    const { dispatchBtnExpense, expenses } = this.props;
-    const { value, description, currency, method, tag } = this.state;
-    const ExchangeRates = await fetch('https://economia.awesomeapi.com.br/json/all')
-      .then((result) => result.json());
-    this.setState({
-      id: expenses.length,
-      value,
-      description,
-      currency,
-      method,
-      tag,
-      exchangeRates: ExchangeRates,
-    });
+  handleClick() {
+    const { dispatchBtnExpense } = this.props;
+    this.setState((prev) => ({
+      id: prev.id + 1,
+    }));
     dispatchBtnExpense(this.state);
   }
 
@@ -108,15 +103,14 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getCurrencies: () => dispatch(expenseAPI()),
-  dispatchBtnExpense: (state) => dispatch(actionBtn(state)),
+  getCurrencies: (array) => dispatch(walletObj(array)),
+  dispatchBtnExpense: (allState) => dispatch(fetchRates(allState)),
 });
 
 ExpenseForm.propTypes = {
   currencies: PropTypes.arrayOf(PropTypes.string).isRequired,
   getCurrencies: PropTypes.func.isRequired,
   dispatchBtnExpense: PropTypes.func.isRequired,
-  expenses: PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ExpenseForm);

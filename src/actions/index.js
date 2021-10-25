@@ -13,15 +13,13 @@ export const walletObj = (data) => ({
   data,
 });
 
-export const actionBtn = (payload) => ({
+export const actionBtn = (allState) => ({
   type: BUTTON_ADD,
-  payload,
+  allState,
 });
 
-export function expenseAPI() {
-  return async (dispatch) => {
-    const response = await fetch('https://economia.awesomeapi.com.br/json/all');
-    const data = await response.json();
-    return dispatch(walletObj(data));
-  };
-}
+export const fetchRates = (expensesData) => async (dispatch) => {
+  const rates = await fetch('https://economia.awesomeapi.com.br/json/all')
+    .then((response) => response.json());
+  dispatch(actionBtn({ ...expensesData, exchangeRates: rates }));
+};
