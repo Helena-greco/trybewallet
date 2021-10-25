@@ -1,8 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import expenseAPI from '../service/ExpenseAPI';
-import { actionBtn } from '../actions/index';
+import { actionBtn, expenseAPI } from '../actions/index';
 
 class ExpenseForm extends React.Component {
   constructor() {
@@ -14,11 +13,21 @@ class ExpenseForm extends React.Component {
       currency: 'USD',
       method: 'Dinheiro',
       tag: 'Alimentação',
-      allExpenses: [],
+      exchangeRates: [],
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.getAPI = this.getAPI.bind(this);
+  }
+
+  componentDidMount() {
+    this.getAPI();
+  }
+
+  getAPI() {
+    const { getCurrencies } = this.props;
+    getCurrencies();
   }
 
   handleChange({ target }) {
@@ -32,7 +41,7 @@ class ExpenseForm extends React.Component {
     const { value, description, currency, method, tag } = this.state;
     const ExchangeRates = await fetch('https://economia.awesomeapi.com.br/json/all')
       .then((result) => result.json());
-    const walletExpenses = [{
+    this.setState({
       id: expenses.length,
       value,
       description,
@@ -40,48 +49,50 @@ class ExpenseForm extends React.Component {
       method,
       tag,
       exchangeRates: ExchangeRates,
-    }];
-    this.setState({
-      allExpenses: [...walletExpenses],
     });
     dispatchBtnExpense(this.state);
   }
 
   render() {
     const { currencies } = this.props;
+    const { value, description, currency, method, tag } = this.state;
+    const paymentMethods = ['Dinheiro', 'Cartão de crédito', 'Cartão de débito'];
+    const categories = ['Alimentação', 'Lazer', 'Trabalho', 'Transporte', 'Saúde'];
     return (
       <form>
         <label htmlFor="value">
           Valor:
-          <input id="value" type="text" onChange={ this.handleChange } />
+          <input id="value" type="text" value={ value } onChange={ this.handleChange } />
         </label>
         <label htmlFor="currency">
           Moeda:
-          <select id="currency" onChange={ this.handleChange }>
+          <select id="currency" value={ currency } onChange={ this.handleChange }>
             { currencies.map((coin, index) => (
               <option key={ index }>{ coin }</option>
             )) }
           </select>
         </label>
-        <label htmlFor="payment">
+        <label htmlFor="method">
           Método de pagamento:
-          <select id="payment" onChange={ this.handleChange }>
-            <option>Dinheiro</option>
-            <option>Cartão de crédito</option>
-            <option>Cartão de débito</option>
+          <select id="method" value={ method } onChange={ this.handleChange }>
+            { paymentMethods.map((payment, index) => (
+              <option key={ index }>
+                { payment }
+              </option>
+            )) }
           </select>
         </label>
-        <label htmlFor="expense">
+        <label htmlFor="tag">
           Tag:
-          <select id="expense" onChange={ this.handleChange }>
-            <option>Alimentação</option>
-            <option>Lazer</option>
-            <option>Trabalho</option>
-            <option>Transporte</option>
-            <option>Saúde</option>
+          <select id="tag" value={ tag } onChange={ this.handleChange }>
+            {categories.map((category, index) => (
+              <option key={ index }>
+                { category }
+              </option>
+            ))}
           </select>
         </label>
-        <label htmlFor="description" onChange={ this.handleChange }>
+        <label htmlFor="description" value={ description } onChange={ this.handleChange }>
           Descrição:
           <input id="description" type="text" />
         </label>
@@ -103,8 +114,9 @@ const mapDispatchToProps = (dispatch) => ({
 
 ExpenseForm.propTypes = {
   currencies: PropTypes.arrayOf(PropTypes.string).isRequired,
+  getCurrencies: PropTypes.func.isRequired,
   dispatchBtnExpense: PropTypes.func.isRequired,
-  expenses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  expenses: PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ExpenseForm);
